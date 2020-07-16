@@ -58,7 +58,7 @@ public final class RegistryManagementConstants extends RequestResponseApiConstan
      */
     public static final String TENANT_HTTP_ENDPOINT = "tenants";
 
-    // FIELD DEFINTIONS
+    // FIELD DEFINITIONS
 
     // DEVICES
 
@@ -103,6 +103,11 @@ public final class RegistryManagementConstants extends RequestResponseApiConstan
      * The name of the field that contains the names of the gateway groups that the (gateway) device is a member of.
      */
     public static final String FIELD_MEMBER_OF = "memberOf";
+
+    /**
+     * The name of the field that contains patch data for a PATCH request.
+     */
+    public static final String FIELD_PATCH_DATA = "patch";
 
     // CREDENTIALS
 

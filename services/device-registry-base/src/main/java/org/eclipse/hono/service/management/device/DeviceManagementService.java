@@ -13,6 +13,7 @@
 
 package org.eclipse.hono.service.management.device;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hono.service.management.Id;
@@ -21,6 +22,7 @@ import org.eclipse.hono.service.management.Result;
 
 import io.opentracing.Span;
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonArray;
 
 /**
  * A service for managing device registration information.
@@ -106,4 +108,24 @@ public interface DeviceManagementService {
      *      Device Registry Management API - Delete Device Registration</a>
      */
     Future<Result<Void>> deleteDevice(String tenantId, String deviceId, Optional<String> resourceVersion, Span span);
+
+    /**
+     * Apply a patch to a list of devices.
+     *
+     * @param tenantId The tenant the device belongs to.
+     * @param deviceIds A list of devices ID to apply the patch to.
+     * @param patch The Json patch, following RFC 6902.
+     * @param span The active OpenTracing span for this operation. It is not to be closed in this method!
+     *          An implementation should log (error) events on this span and it may set tags and use this span as the
+     *          parent for any spans created in this method.
+     * @return  A future indicating the outcome of the operation.
+     *         The <em>status code</em> is set as specified in the
+     *         <a href="https://www.eclipse.org/hono/docs/api/management/#/devices/patchRegistration">
+     *         Device Registry Management API - Patch Device Registration </a>
+     * @throws NullPointerException if any of the parameters is {@code null}.
+     * @see <a href="https://www.eclipse.org/hono/docs/api/management/#/devices/patchRegistration">
+     *      Device Registry Management API - Patch Device Registration</a>
+     */
+    Future<Result<Void>> patchDevice(String tenantId, List deviceIds, JsonArray patch, Span span);
+
 }

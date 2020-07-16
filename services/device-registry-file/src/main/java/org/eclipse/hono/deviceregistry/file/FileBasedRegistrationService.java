@@ -430,6 +430,11 @@ public class FileBasedRegistrationService extends AbstractRegistrationService
         return Future.succeededFuture(processCreateDevice(tenantId, deviceId, device, span));
     }
 
+    @Override
+    public Future<Result<Void>> patchDevice(final String tenantId, final List deviceIds, final JsonArray patch, final Span span) {
+        return Future.succeededFuture(OperationResult.from(HttpURLConnection.HTTP_NOT_IMPLEMENTED));
+    }
+
     /**
      * Adds a device to this registry.
      *

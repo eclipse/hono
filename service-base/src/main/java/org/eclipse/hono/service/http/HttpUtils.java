@@ -43,6 +43,10 @@ public final class HttpUtils {
      */
     public static final String CONTENT_TYPE_JSON = "application/json";
     /**
+     * The <em>application/json-patch</em> content type.
+     */
+    public static final String CONTENT_TYPE_JSON_PATCH = "application/json-patch";
+    /**
      * The <em>application/json; charset=utf-8</em> content type.
      */
     public static final String CONTENT_TYPE_JSON_UTF8 = "application/json; charset=utf-8";

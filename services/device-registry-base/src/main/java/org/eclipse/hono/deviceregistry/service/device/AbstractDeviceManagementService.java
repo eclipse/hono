@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.hono.deviceregistry.service.device;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import io.opentracing.Span;
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonArray;
 
 /**
  * An abstract base class implementation for {@link DeviceManagementService}.
@@ -89,6 +91,18 @@ public abstract class AbstractDeviceManagementService implements DeviceManagemen
      * @return A future indicating the outcome of the operation.
      */
     protected abstract Future<Result<Void>> processDeleteDevice(DeviceKey key, Optional<String> resourceVersion, Span span);
+
+    /**
+     * Apply a patch to a list of devices.
+     *
+     * @param tenantId The tenant the device belongs to.
+     * @param deviceIds A list of devices ID to apply the patch to.
+     * @param patchData The actual data to patch.
+     * @param span The active OpenTracing span for this operation.
+     * @return  A future indicating the outcome of the operation.
+     */
+     protected abstract Future<Result<Void>> processPatchDevice(String tenantId, List deviceIds,
+                                                                JsonArray patchData, Span span);
 
     /**
      * Generates a unique device identifier for a given tenant. A default implementation generates a random UUID value.
@@ -155,6 +169,21 @@ public abstract class AbstractDeviceManagementService implements DeviceManagemen
                 .compose(result -> result.isError()
                         ? Future.succeededFuture(Result.from(result.getStatus()))
                         : processDeleteDevice(DeviceKey.from(result.getPayload(), deviceId), resourceVersion, span));
+
+    }
+
+    @Override
+    public Future<Result<Void>> patchDevice(final String tenantId, final List deviceIds, final JsonArray patch, final Span span) {
+
+        Objects.requireNonNull(tenantId);
+        Objects.requireNonNull(deviceIds);
+        Objects.requireNonNull(patch);
+
+        return this.tenantInformationService
+                .tenantExists(tenantId, span)
+                .compose(result -> result.isError()
+                        ? Future.succeededFuture(Result.from(result.getStatus()))
+                        : processPatchDevice(tenantId, deviceIds, patch, span));
 
     }
 }

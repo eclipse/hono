@@ -47,6 +47,7 @@ import io.opentracing.noop.NoopSpan;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -169,6 +170,12 @@ public class FileBasedDeviceBackend implements AutoProvisioningEnabledDeviceBack
     public Future<OperationResult<Id>> updateDevice(final String tenantId, final String deviceId, final Device device,
             final Optional<String> resourceVersion, final Span span) {
         return registrationService.updateDevice(tenantId, deviceId, device, resourceVersion, span);
+    }
+
+    @Override
+    public Future<Result<Void>> patchDevice(final String tenantId, final List deviceIds,
+                                            final JsonArray patch, final Span span) {
+        return registrationService.patchDevice(tenantId, deviceIds, patch, span);
     }
 
     // CREDENTIALS

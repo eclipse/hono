@@ -112,7 +112,8 @@ public abstract class AbstractHttpEndpoint<T extends ServiceConfigProperties> ex
         final MIMEHeader contentType = ctx.parsedHeaders().contentType();
         if (contentType == null) {
             ctx.fail(new ClientErrorException(HttpURLConnection.HTTP_BAD_REQUEST, "Missing Content-Type header"));
-        } else if (!HttpUtils.CONTENT_TYPE_JSON.equalsIgnoreCase(contentType.value())) {
+        } else if ( !(HttpUtils.CONTENT_TYPE_JSON.equalsIgnoreCase(contentType.value()) ||
+                    HttpUtils.CONTENT_TYPE_JSON_PATCH.equalsIgnoreCase(contentType.value()))) {
             ctx.fail(new ClientErrorException(HttpURLConnection.HTTP_BAD_REQUEST, "Unsupported Content-Type"));
         } else {
             try {

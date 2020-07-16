@@ -13,16 +13,22 @@
 
 package org.eclipse.hono.service.management.device;
 
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import javax.json.Json;
+import javax.json.JsonPatch;
 
 import org.eclipse.hono.client.ClientErrorException;
 import org.eclipse.hono.config.ServiceConfigProperties;
 import org.eclipse.hono.service.http.TracingHandler;
 import org.eclipse.hono.service.management.AbstractDelegatingRegistryHttpEndpoint;
 import org.eclipse.hono.service.management.Id;
+import org.eclipse.hono.service.management.OperationResult;
 import org.eclipse.hono.tracing.TracingHelper;
 import org.eclipse.hono.util.RegistryManagementConstants;
 
@@ -34,6 +40,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.DecodeException;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -54,6 +61,7 @@ public class DelegatingDeviceManagementHttpEndpoint<S extends DeviceManagementSe
     private static final String SPAN_NAME_GET_DEVICE = "get Device from management API";
     private static final String SPAN_NAME_UPDATE_DEVICE = "update Device from management API";
     private static final String SPAN_NAME_REMOVE_DEVICE = "remove Device from management API";
+    private static final String SPAN_NAME_PATCH_DEVICES = "patch Devices from management API";
 
     private static final String DEVICE_MANAGEMENT_ENDPOINT_NAME = String.format("%s/%s",
                     RegistryManagementConstants.API_VERSION,
@@ -83,7 +91,7 @@ public class DelegatingDeviceManagementHttpEndpoint<S extends DeviceManagementSe
                 PARAM_DEVICE_ID);
 
         // Add CORS handler
-        router.route(pathWithTenant).handler(createCorsHandler(config.getCorsAllowedOrigin(), EnumSet.of(HttpMethod.POST)));
+        router.route(pathWithTenant).handler(createCorsHandler(config.getCorsAllowedOrigin(), EnumSet.of(HttpMethod.POST, HttpMethod.PATCH)));
         router.route(pathWithTenantAndDeviceId).handler(createDefaultCorsHandler(config.getCorsAllowedOrigin()));
 
 
@@ -111,6 +119,11 @@ public class DelegatingDeviceManagementHttpEndpoint<S extends DeviceManagementSe
         router.delete(pathWithTenantAndDeviceId)
                 .handler(this::extractIfMatchVersionParam)
                 .handler(this::doDeleteDevice);
+
+        // PATCH devices
+        router.patch(pathWithTenant)
+                .handler(this::extractRequiredJsonPayload)
+                .handler(this::doPatchDevices);
     }
 
     private void doGetDevice(final RoutingContext ctx) {
@@ -210,6 +223,76 @@ public class DelegatingDeviceManagementHttpEndpoint<S extends DeviceManagementSe
             .onSuccess(result -> writeResponse(ctx, result, span))
             .onFailure(t -> failRequest(ctx, t, span))
             .onComplete(s -> span.finish());
+    }
+
+    private void doPatchDevices(final RoutingContext ctx) {
+
+        final Span span = TracingHelper.buildServerChildSpan(
+                tracer,
+                TracingHandler.serverSpanContext(ctx),
+                SPAN_NAME_PATCH_DEVICES,
+                getClass().getSimpleName()
+        ).start();
+
+        final Future<String> tenantId = getRequestParameter(ctx, PARAM_TENANT_ID, getPredicate(config.getTenantIdPattern(), false));
+
+        // NOTE that the remaining code would be executed in any case, i.e.
+        // even if any of the parameters retrieved from the RoutingContext were null
+        // However, this will not happen because of the way the routes are set up,
+        // i.e. a request for a URI that doesn't contain a device ID will result
+        // in a 404 response.
+
+        final JsonObject payload = ctx.get(KEY_REQUEST_BODY);
+        final List<String> deviceList = payload.getJsonArray(RegistryManagementConstants.FIELD_ID).getList();
+        final JsonArray patch = payload.getJsonArray(RegistryManagementConstants.FIELD_PATCH_DATA);
+
+        // try to call the implementing service
+        getService().patchDevice(tenantId.result(), deviceList, patch, span).onComplete(handler -> {
+            if (handler.result().getStatus() == HttpURLConnection.HTTP_NOT_IMPLEMENTED) {
+
+                // if not implemented we can do it here.
+                final JsonObject response = new JsonObject();
+                final javax.json.JsonArray formatedPatch = Json.createReader(new StringReader(patch.encode())).readArray();
+                final JsonPatch jsonpatch = Json.createPatch(formatedPatch);
+                for (String devId : deviceList) {
+
+                    getService().readDevice(tenantId.result(), devId, span)
+                            .onComplete(r -> {
+
+                                if (r.result().getStatus() == HttpURLConnection.HTTP_OK) {
+                                    final JsonObject jsonDevice = JsonObject.mapFrom(r.result().getPayload());
+                                    javax.json.JsonObject device = Json.createReader(new StringReader(jsonDevice.encode())).readObject();
+
+                                    // apply the patch to the existing device
+                                    device = jsonpatch.apply(device);
+
+                                    //update the registry with the new payload
+                                    final Device updatedDevice = new JsonObject(device.toString()).mapTo(Device.class);
+                                    getService().updateDevice(tenantId.result(), devId, updatedDevice, Optional.empty(), span)
+                                            .onComplete(u -> {
+                                                response.put(devId, new JsonObject()
+                                                                .put("status", u.result().getStatus())
+                                                                .put("resource-version", u.result().getResourceVersion().orElse("")));
+                                            });
+
+                                } else {
+                                    response.put(devId, new JsonObject()
+                                                    .put("status", r.result().getStatus())
+                                                    // the registry doesn't issue an error message.
+                                                    .put("error-message", String.format("device '%s' cannot be retrieved", devId))
+                                    );
+                                }
+                            });
+
+                }
+                final OperationResult result = OperationResult.ok(HttpURLConnection.HTTP_CREATED, response, Optional.empty(), Optional.empty());
+                writeResponse(ctx, result, null, span);
+
+            // the service implemented the feature.
+            } else {
+                writeResponse(ctx, handler.result(), null, span);
+            }
+        });
     }
 
     /**

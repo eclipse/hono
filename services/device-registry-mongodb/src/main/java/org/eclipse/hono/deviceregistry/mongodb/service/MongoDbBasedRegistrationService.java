@@ -177,6 +177,11 @@ public final class MongoDbBasedRegistrationService extends AbstractRegistrationS
                 .recover(error -> Future.succeededFuture(MongoDbDeviceRegistryUtils.mapErrorToResult(error, span)));
     }
 
+    @Override
+    public Future<Result<Void>> patchDevice(final String tenantId, final List deviceIds, final JsonArray patch, final Span span) {
+       return Future.succeededFuture(OperationResult.from(HttpURLConnection.HTTP_NOT_IMPLEMENTED));
+    }
+
     /**
      * {@inheritDoc}
      */

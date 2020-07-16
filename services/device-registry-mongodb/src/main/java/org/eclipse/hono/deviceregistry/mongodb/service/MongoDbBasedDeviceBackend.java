@@ -35,6 +35,7 @@ import com.google.common.base.MoreObjects.ToStringHelper;
 import io.opentracing.Span;
 import io.opentracing.noop.NoopSpan;
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -94,6 +95,12 @@ public class MongoDbBasedDeviceBackend implements AutoProvisioningEnabledDeviceB
                             span)
                             .map(result);
                 });
+    }
+
+    @Override
+    public Future<Result<Void>> patchDevice(final String tenantId, final List deviceIds,
+                                            final JsonArray patch, final Span span) {
+        return registrationService.patchDevice(tenantId, deviceIds, patch, span);
     }
 
     @Override
