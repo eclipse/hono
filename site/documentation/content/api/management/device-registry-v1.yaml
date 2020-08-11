@@ -598,6 +598,85 @@ paths:
             412:
                $ref: '#/components/responses/ResourceVersionMismatch'
 
+   # Gateway groups API
+
+   /gateway-groups/{tenantId}:
+
+      parameters:
+         - $ref: '#/components/parameters/tenantId'
+
+      get:
+         tags:
+            - gateway groups
+         summary: Retrieve the list of existing gateway groups for the tenant.
+         operationId: getGatewayGroupsForTenant
+
+         responses:
+            200:
+               description: Operation successful
+               content:
+                  application/json:
+                     schema:
+                        $ref: '#/components/schemas/gatewayGroupsSet'
+            400:
+               $ref: '#/components/responses/MalformedRequest'
+            401:
+               $ref: '#/components/responses/Unauthorized'
+            404:
+               $ref: '#/components/responses/NotFound'
+
+   /gateway-groups/{tenantId}/{groupId}/via:
+
+      parameters:
+         - $ref: '#/components/parameters/tenantId'
+         - $ref: '#/components/parameters/groupId'
+
+      get:
+         tags:
+            - gateway groups
+         summary: Retrieve the list of devices that can use this group as a gateway.
+         operationId: getDevicesUsingGatewayGroup
+
+         responses:
+            200:
+               description: Operation successful
+               content:
+                  application/json:
+                     schema:
+                        $ref: '#/components/schemas/deviceIDsSet'
+            400:
+               $ref: '#/components/responses/MalformedRequest'
+            401:
+               $ref: '#/components/responses/Unauthorized'
+            404:
+               $ref: '#/components/responses/NotFound'
+
+   /gateway-groups/{tenantId}/{groupId}/members:
+
+      parameters:
+         - $ref: '#/components/parameters/tenantId'
+         - $ref: '#/components/parameters/groupId'
+
+      get:
+         tags:
+            - gateway groups
+         summary: Retrieve the list of devices in that gateway group.
+         operationId: getDevicesInGatewayGroup
+
+         responses:
+            200:
+               description: Operation successful
+               content:
+                  application/json:
+                     schema:
+                        $ref: '#/components/schemas/deviceIDsSet'
+            400:
+               $ref: '#/components/responses/MalformedRequest'
+            401:
+               $ref: '#/components/responses/Unauthorized'
+            404:
+               $ref: '#/components/responses/NotFound'
+
 components:
 
    schemas:
@@ -1131,6 +1210,20 @@ components:
                     type: string
                     format: byte
 
+      # Groups of gateways
+
+      gatewayGroupsSet:
+         type: array
+         description: A set of gateways group IDs. This matches the "memberOf" property on the device payload.
+         items:
+            type: string
+
+      deviceIDsSet:
+         type: array
+         description: A setof devices IDs. All the devices belongs in the same gateway group.
+         items:
+            type: string
+
    parameters:
 
       resourceVersion:
@@ -1180,6 +1273,16 @@ components:
             type: string
             pattern: "[a-z0-9-]"
          example: sha-256
+
+      groupId:
+         name: groupId
+         in: path
+         description: The ID of the group of gateways
+         required: true
+         schema:
+            type: string
+            pattern: "[a-zA-Z0-9-_\\.]"
+         example: buildingA
 
    responses:
 
