@@ -220,6 +220,7 @@ public abstract class AbstractAtLeastOnceKafkaConsumer<T> implements Lifecycle {
 
         return promise.future()
                 .compose(v -> {
+                    LOG.debug("subscribe done, now poll...");
                     final Promise<KafkaConsumerRecords<String, Buffer>> pollPromise = Promise.promise();
                     kafkaConsumer.poll(pollTimeout, pollPromise);
                     return pollPromise.future()
@@ -277,9 +278,7 @@ public abstract class AbstractAtLeastOnceKafkaConsumer<T> implements Lifecycle {
 
     private void handleBatch(final KafkaConsumerRecords<String, Buffer> records) {
         try {
-            if (!records.isEmpty()) {
-                LOG.debug("polled {} records on {}", records.size(), topicsLogString);
-            }
+            LOG.debug("polled {} records on {}", records.size(), topicsLogString);
 
             for (int i = 0; i < records.size(); i++) {
                 if (stopped) {

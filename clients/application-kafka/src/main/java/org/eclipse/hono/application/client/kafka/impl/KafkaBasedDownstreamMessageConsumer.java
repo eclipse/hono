@@ -21,6 +21,8 @@ import org.eclipse.hono.application.client.kafka.KafkaMessageContext;
 import org.eclipse.hono.client.kafka.HonoTopic;
 import org.eclipse.hono.client.kafka.consumer.AbstractAtLeastOnceKafkaConsumer;
 import org.eclipse.hono.client.kafka.consumer.KafkaConsumerConfigProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -35,6 +37,8 @@ import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
  */
 public class KafkaBasedDownstreamMessageConsumer
         extends AbstractAtLeastOnceKafkaConsumer<DownstreamMessage<KafkaMessageContext>> implements MessageConsumer {
+
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaBasedDownstreamMessageConsumer.class);
 
     /**
      * Creates a new downstream consumer.
@@ -81,6 +85,8 @@ public class KafkaBasedDownstreamMessageConsumer
         Objects.requireNonNull(config);
         Objects.requireNonNull(messageHandler);
         Objects.requireNonNull(closeHandler);
+
+        LOG.debug("KafkaBasedDownstreamMessageConsumer.create");
 
         final String topic = new HonoTopic(type, tenantId).toString();
         final long pollTimeout = config.getPollTimeout();

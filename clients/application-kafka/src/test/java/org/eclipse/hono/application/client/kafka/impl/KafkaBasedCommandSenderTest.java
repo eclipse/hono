@@ -24,15 +24,14 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.MockConsumer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
-import org.apache.kafka.clients.producer.MockProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.common.record.TimestampType;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.eclipse.hono.client.kafka.CachingKafkaProducerFactory;
 import org.eclipse.hono.client.kafka.HonoTopic;
 import org.eclipse.hono.client.kafka.KafkaProducerConfigProperties;
@@ -51,6 +50,7 @@ import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.kafka.client.consumer.KafkaConsumer;
+import io.vertx.kafka.client.serialization.BufferSerializer;
 
 /**
  * Tests verifying behavior of {@link KafkaBasedCommandSender}.
@@ -58,7 +58,7 @@ import io.vertx.kafka.client.consumer.KafkaConsumer;
  */
 @ExtendWith(VertxExtension.class)
 // Sending command (request/response pattern) requires slightly higher timeout in slower environments.
-@Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
+@Timeout(value = 40, timeUnit = TimeUnit.SECONDS)
 public class KafkaBasedCommandSenderTest {
     private KafkaBasedCommandSender commandSender;
     private KafkaConsumerConfigProperties consumerConfig;
@@ -84,7 +84,7 @@ public class KafkaBasedCommandSenderTest {
         mockConsumer = new MockConsumer<>(OffsetResetStrategy.LATEST);
         producerConfig = new KafkaProducerConfigProperties();
         producerConfig.setProducerConfig(Map.of("client.id", "application-test-sender"));
-        mockProducer = KafkaClientUnitTestHelper.newMockProducer(true);
+        mockProducer = new MockProducer<>(true, new StringSerializer(), new BufferSerializer());
         producerFactory = KafkaClientUnitTestHelper.newProducerFactory(mockProducer);
 
         commandSender = new KafkaBasedCommandSender(vertx, consumerConfig, producerFactory, producerConfig,
@@ -156,7 +156,7 @@ public class KafkaBasedCommandSenderTest {
      * @param ctx The vert.x test context.
      */
     @Test
-    public void testSendCommandAndReceiveResponse(final VertxTestContext ctx) {
+    public void testSendCommandAndReceiveResponse(final VertxTestContext ctx) { // FIXME HERE
         final Map<String, Object> headerProperties = new HashMap<>();
         final String command = "setVolume";
         final String correlationId = UUID.randomUUID().toString();

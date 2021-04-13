@@ -32,8 +32,11 @@
     </encoder>
   </appender>
 
-  <root level="INFO">
+  <root level="TRACE">
     <appender-ref ref="STDOUT" />
   </root>
+
+  <logger name="io.vertx.kafka" level="TRACE"/>
+  <logger name="org.apache.kafka" level="TRACE"/>
 
 </configuration>
