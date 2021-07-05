@@ -51,7 +51,6 @@ import org.eclipse.hono.util.MessageHelper;
 import org.eclipse.hono.util.RegistryManagementConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -441,7 +440,6 @@ abstract class CredentialsApiTests extends DeviceRegistryTestBase {
      * @param ctx The vert.x test context.
      */
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    @EnabledIfSystemProperty(named = "deviceregistry.credentials.supportsClientContext", matches = "true")
     @Test
     public void testGetCredentialsFailsForNonMatchingClientContext(final VertxTestContext ctx) {
 

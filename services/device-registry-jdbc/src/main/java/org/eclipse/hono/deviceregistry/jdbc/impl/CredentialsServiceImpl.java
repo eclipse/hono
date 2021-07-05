@@ -27,6 +27,7 @@ import org.eclipse.hono.deviceregistry.jdbc.config.DeviceServiceProperties;
 import org.eclipse.hono.deviceregistry.service.credentials.AbstractCredentialsService;
 import org.eclipse.hono.deviceregistry.service.credentials.CredentialKey;
 import org.eclipse.hono.deviceregistry.service.tenant.TenantKey;
+import org.eclipse.hono.deviceregistry.util.DeviceRegistryUtils;
 import org.eclipse.hono.service.base.jdbc.store.device.TableAdapterStore;
 import org.eclipse.hono.util.Constants;
 import org.eclipse.hono.util.CredentialsConstants;
@@ -77,6 +78,7 @@ public class CredentialsServiceImpl extends AbstractCredentialsService {
                             .stream()
                             .map(JsonObject::mapFrom)
                             .filter(filter(key.getType(), key.getAuthId()))
+                            .filter(credential -> DeviceRegistryUtils.matchesWithClientContext(credential, clientContext))
                             .flatMap(c -> c.getJsonArray(CredentialsConstants.FIELD_SECRETS)
                                     .stream()
                                     .filter(JsonObject.class::isInstance)
@@ -147,11 +149,11 @@ public class CredentialsServiceImpl extends AbstractCredentialsService {
             }
 
             if (!type.equals(c.getString(CredentialsConstants.FIELD_TYPE))) {
-                return true;
+                return false;
             }
 
             if (!authId.equals(c.getString(CredentialsConstants.FIELD_AUTH_ID))) {
-                return true;
+                return false;
             }
 
             return true;

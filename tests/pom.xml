@@ -98,9 +98,6 @@ Test cases are run against Docker images of Hono server + (Apache Qpid Dispatch 
     <!--
       Device Registry related properties - The MongoDB based device registry is used as the default one.
     -->
-    <!-- should be set to false if testing against a registry that doesn't support comparing client context
-         when retrieving credentials -->
-    <hono.deviceregistry.credentials.supportsClientContext>true</hono.deviceregistry.credentials.supportsClientContext>
     <!-- should be set to false if testing against a registry that doesn't support GW mode -->
     <hono.deviceregistry.supportsGatewayMode>true</hono.deviceregistry.supportsGatewayMode>
     <!-- should be set to false if testing against a registry that doesn't support the "search Devices" operation -->
@@ -447,7 +444,6 @@ Test cases are run against Docker images of Hono server + (Apache Qpid Dispatch 
         <hono.deviceregistry.image>hono-service-device-registry-jdbc</hono.deviceregistry.image>
         <hono.deviceregistry.resources.folder>deviceregistry-jdbc-h2</hono.deviceregistry.resources.folder>
         <hono.deviceregistry.spring.profiles>registry-adapter,registry-management,tenant-service,create-schema,${logging.profile}</hono.deviceregistry.spring.profiles>
-        <hono.deviceregistry.credentials.supportsClientContext>false</hono.deviceregistry.credentials.supportsClientContext>
         <hono.deviceregistry.supportsSearchDevices>false</hono.deviceregistry.supportsSearchDevices>
         <hono.deviceregistry.supportsSearchTenants>false</hono.deviceregistry.supportsSearchTenants>
         <!-- increase memory limit of the device registry container to 400MB in order to accommodate for embedded H2 DB -->
@@ -469,7 +465,6 @@ Test cases are run against Docker images of Hono server + (Apache Qpid Dispatch 
         <hono.deviceregistry.image>hono-service-device-registry-jdbc</hono.deviceregistry.image>
         <hono.deviceregistry.resources.folder>deviceregistry-jdbc-postgres</hono.deviceregistry.resources.folder>
         <hono.deviceregistry.spring.profiles>registry-adapter,registry-management,tenant-service,create-schema,${logging.profile}</hono.deviceregistry.spring.profiles>
-        <hono.deviceregistry.credentials.supportsClientContext>false</hono.deviceregistry.credentials.supportsClientContext>
         <hono.deviceregistry.supportsSearchDevices>false</hono.deviceregistry.supportsSearchDevices>
         <hono.deviceregistry.supportsSearchTenants>false</hono.deviceregistry.supportsSearchTenants>
         <hono.jdbc.db.url>jdbc:postgresql://hono-jdbc-db.hono:5432/</hono.jdbc.db.url>
@@ -1568,7 +1563,6 @@ Test cases are run against Docker images of Hono server + (Apache Qpid Dispatch 
                 <deviceregistry.amqp.port>${deviceregistry.amqp.port}</deviceregistry.amqp.port>
                 <deviceregistry.http.port>${deviceregistry.http.port}</deviceregistry.http.port>
                 <deviceregistry.supportsGatewayMode>${hono.deviceregistry.supportsGatewayMode}</deviceregistry.supportsGatewayMode>
-                <deviceregistry.credentials.supportsClientContext>${hono.deviceregistry.credentials.supportsClientContext}</deviceregistry.credentials.supportsClientContext>
                 <deviceregistry.supportsSearchDevices>${hono.deviceregistry.supportsSearchDevices}</deviceregistry.supportsSearchDevices>
                 <deviceregistry.supportsSearchTenants>${hono.deviceregistry.supportsSearchTenants}</deviceregistry.supportsSearchTenants>
                 <adapter.coap.host>${coap.ip}</adapter.coap.host>
