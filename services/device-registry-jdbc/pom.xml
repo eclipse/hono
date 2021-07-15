@@ -88,6 +88,15 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
     </dependency>
+    <!--
+      use BC for creating self-signed certs instead of sun.security.x509
+      which has been removed in OpenJDK 15
+    -->
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpkix-jdk15on</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

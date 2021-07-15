@@ -4,6 +4,13 @@ title = "What is new & noteworthy in Hono?"
 description = "Information about changes in recent Hono releases. Includes new features, fixes, enhancements and API changes."
 +++
 
+## 1.10.0 (not yet released)
+
+### Fixes & Enhancements
+
+* The JDBC based device registry's *get Credentials* operation used by the protocol adapters now also supports
+  matching credentials against a given *client context*.
+
 ## 1.9.0
 
 ### New Features
