@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.hono.deviceregistry.service.tenant;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import com.google.common.base.MoreObjects;
@@ -25,6 +28,8 @@ public class TenantKey {
 
     private final String tenantId;
     private final String name;
+
+    private Map<String, Object> properties = new HashMap<>();
 
 
     /**
@@ -55,6 +60,62 @@ public class TenantKey {
      */
     public String getName() {
         return name;
+    }
+
+
+    /**
+     * Gets the properties of this tenant key.
+     *
+     * @return An unmodifiable view on the extension properties.
+     */
+    public Map<String, Object> getProperties() {
+        return Collections.unmodifiableMap(properties);
+    }
+
+    /**
+     * Sets the properties for this tenant key.
+     * <p>
+     * Existing properties are completely replaced by the new properties.
+     *
+     * @param properties The properties.
+     * @return This instance, to allow chained invocations.
+     */
+    public TenantKey setProperties(final Map<String, Object> properties) {
+        this.properties.clear();
+        if (properties != null) {
+            this.properties.putAll(properties);
+        }
+        return this;
+    }
+
+    /**
+     * Get a property from this tenant key.
+     *
+     * @param key The key of the entry.
+     * @return The property if found or {@code null} otherwise.
+     * @throws NullPointerException if the key argument is {@code null}.
+     */
+    public Object getProperty(final String key) {
+        Objects.requireNonNull(key);
+
+        return properties.get(key);
+    }
+
+    /**
+     * Adds a property to this tenant key.
+     * <p>
+     * If a property already exist for the specified key, the old value is replaced by the specified value.
+     *
+     * @param key The key of the entry.
+     * @param value The value of the entry.
+     * @return This instance, to allow chained invocations.
+     * @throws NullPointerException if any of the arguments are {@code null}.
+     */
+    public TenantKey putProperty(final String key, final Object value) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(value);
+        this.properties.put(key, value);
+        return this;
     }
 
     /**
