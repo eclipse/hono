@@ -12,7 +12,18 @@
 # SPDX-License-Identifier: EPL-2.0
 #*******************************************************************************
 
+# This script deploys Hono with the configuration intended for the Eclipse Foundation's sandbox.
+# It requires that the namespace "hono" already exists and that the secret for the certificate is present.
+
 set -ue
 
-KUBECONFIG="--kubeconfig /etc/rancher/k3s/k3s.yaml"
-HELM_WAIT="--wait --timeout 5m0s"
+SCRIPTPATH="$(cd "$(dirname "$0")" && pwd -P)"
+
+echo ""
+echo "Adding the Helm repository for Hono..."
+helm repo add eclipse-iot https://eclipse.org/packages/charts
+helm repo update
+
+echo ""
+echo "Deploying Hono..."
+helm install eclipse-hono --dependency-update -f $SCRIPTPATH/hono-values.yml -n hono eclipse-iot/hono --wait --timeout 5m0s

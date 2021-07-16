@@ -9,17 +9,21 @@ This folder contains scripts and configuration files for setting up a Hono *sand
 
 # Deployment
 
-The scripts need to be executed in the order of the numbers in the file names:
+The scripts need to be executed in the order of the numbers in the file names.
 
-1. Install Kubernetes: `sudo ./00-install-k3s.sh`.
-2. Deploy the [cert-manager](https://cert-manager.io/) & request a public certificate from Let's Encrypt: `sudo ./10-deploy-cert-manager.sh $LE_EMAIL` (creates the namespace "hono").
-3. Deploy Hono: `sudo ./20-deploy-hono.sh`.
+* Install Kubernetes with: `./00-install-k3s.sh`. Export the Kubernetes config as an environment variable, 
+   e.g., like: `export KUBECONFIG=/etc/rancher/k3s/k3s.yaml`. 
+* Deploy the [cert-manager](https://cert-manager.io/): `./10-deploy-cert-manager.sh`.
+* Create the namespace "hono": `kubectl create namespace hono`.
+* Requesting a public certificate from Let's Encrypt requires an email address that Let's Encrypt uses to contact you
+  Please make sure to replace "<your-email-address>" in the following commands by an email address that is actually used.
+  Request the certificate with: `./20-create-certificate.sh <your-email-address>`. Verify that the certificate
+  has successfully been issued with `kubectl describe certificates hono-eclipseprojects-io -n hono`. When this looks good,
+  invoke the script again against the productive Let's Encrypt API: `./20-create-certificate.sh <your-email-address> production`
+* Deploy Hono: `./30-deploy-hono.sh`.
 
-**NB:** Let's Encrypt has quite strict rate limits. Therefore the script `10-deploy-cert-manager.sh` does not use
-the productive Let's Encrypt API by default. After the retrieval of a certificate has been successfully tested, 
-execute the script again with `production` as the second argument to request a valid certificate from the productive API.
-
-The scripts need to be executed with `sudo` because the Kube config is only readable by root.
+**NB:** Let's Encrypt has quite strict rate limits. Therefore the script `./20-create-certificate.sh` does not use
+the productive Let's Encrypt API by default. 
 
 # Updating the Let's Encrypt certificate
 

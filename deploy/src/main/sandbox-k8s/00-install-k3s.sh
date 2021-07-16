@@ -15,4 +15,6 @@
 # This script installs the current version of k3s. It is intended to be only used
 # on the Eclipse Foundation's Hono sandbox VM.
 
+set -ue
+
 curl -sfL https://get.k3s.io | sh -s - server --node-name hono.eclipseprojects.io

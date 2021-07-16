@@ -222,6 +222,9 @@ kafka:
   zookeeper:
     persistence:
       size: 200Mi
+    resources:
+      requests:
+        cpu: 150m
   externalAccess:
     service:
       type: "LoadBalancer"
@@ -231,7 +234,7 @@ kafka:
           cpu: 100m
   resources:
     requests:
-      cpu: 100m
+      cpu: 150m
 
 jaegerBackendExample:
   enabled: false
